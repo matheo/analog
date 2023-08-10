@@ -1,5 +1,17 @@
-import { requiresLinking } from '@angular-devkit/build-angular/src/tools/babel/webpack-loader.js';
-import angularApplicationPreset from '@angular-devkit/build-angular/src/tools/babel/presets/application.js';
+import * as wbl from '@angular-devkit/build-angular/src/tools/babel/webpack-loader.js';
+import * as app from '@angular-devkit/build-angular/src/tools/babel/presets/application.js';
+
+let requiresLinking: Function;
+/**
+ * Workaround for compatibility with Angular 16.2+
+ */
+if (typeof wbl['requiresLinking'] !== 'undefined') {
+  requiresLinking = wbl.requiresLinking;
+} else if (typeof (app as any)['requiresLinking'] !== 'undefined') {
+  requiresLinking = (app as any)['requiresLinking'] as Function;
+}
+
+const angularApplicationPreset = app.default;
 
 import { createJitResourceTransformer } from '@angular-devkit/build-angular/src/tools/esbuild/angular/jit-resource-transformer.js';
 import { CompilerPluginOptions } from '@angular-devkit/build-angular/src/tools/esbuild/angular/compiler-plugin.js';

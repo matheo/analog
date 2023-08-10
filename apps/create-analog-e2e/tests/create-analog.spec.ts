@@ -1,5 +1,38 @@
 import { checkFilesExist, uniq, runCommandAsync } from '@nx/plugin/testing';
 import { readFileSync, writeFileSync, rmdirSync } from 'node:fs';
+import fs from 'node:fs';
+import path from 'node:path';
+
+function copy(src, dest) {
+  const stat = fs.statSync(src);
+  if (stat.isDirectory()) {
+    copyDir(src, dest);
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+}
+
+/**
+ * @param {string} srcDir
+ * @param {string} destDir
+ */
+function copyDir(srcDir, destDir) {
+  fs.mkdirSync(destDir, { recursive: true });
+  for (const file of fs.readdirSync(srcDir)) {
+    const srcFile = path.resolve(srcDir, file);
+    const destFile = path.resolve(destDir, file);
+    copy(srcFile, destFile);
+  }
+}
+
+function emptyDir(dir) {
+  if (!fs.existsSync(dir)) {
+    return;
+  }
+  for (const file of fs.readdirSync(dir)) {
+    fs.rmSync(path.resolve(dir, file), { recursive: true, force: true });
+  }
+}
 
 describe('create-analog e2e', () => {
   it('should create my-app', async () => {
@@ -15,7 +48,13 @@ describe('create-analog e2e', () => {
       cwd: tmpDir,
     });
 
-    let viteConfig = readFileSync(`${tmpDir}/vite.config.ts`, 'utf-8');
+    emptyDir(`${tmpDir}/node_modules/@analogjs`);
+    copyDir(
+      `${process.cwd()}/node_modules/@analogjs`,
+      `${tmpDir}/node_modules/@analogjs`
+    );
+
+    let viteConfig = readFileSync(`${tmpDir}/vite.config.mts`, 'utf-8');
     viteConfig = viteConfig.replace(
       'analog()',
       `analog({ vite: { tsconfig: '${tmpDir}/tsconfig.spec.json' } })`
@@ -29,7 +68,7 @@ describe('create-analog e2e', () => {
       `include: ['${project}/**/*.spec.ts'],`
     );
 
-    writeFileSync(`${tmpDir}/vite.config.ts`, viteConfig);
+    writeFileSync(`${tmpDir}/vite.config.mts`, viteConfig);
 
     await runCommandAsync(`ng test`, {
       cwd: tmpDir,
