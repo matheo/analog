@@ -65,7 +65,7 @@ export default defineConfig(({ mode }) => ({
 }));
 ```
 
-Next, define a `src/test.ts` file to setup the `TestBed`:
+Next, define a `src/test-setup.ts` file to setup the `TestBed`:
 
 ```ts
 import '@analogjs/vite-plugin-angular/setup-vitest';
@@ -107,7 +107,7 @@ Next, update the `test` target in the `angular.json` to use the `@nx/vite:test` 
 
 > You can also add a new target and name it `vitest` to run alongside your `test` target.
 
-Lastly, add the `src/test.ts` to `files` array in the `tsconfig.spec.json` in the root of your project.
+Lastly, add the `src/test-setup.ts` to `files` array in the `tsconfig.spec.json` in the root of your project.
 
 ```json
 {
@@ -116,7 +116,7 @@ Lastly, add the `src/test.ts` to `files` array in the `tsconfig.spec.json` in th
     "outDir": "./out-tsc/spec",
     "types": ["jasmine"]
   },
-  "files": ["src/test.ts"],
+  "files": ["src/test-setup.ts"],
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
 }
 ```
